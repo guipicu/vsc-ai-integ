@@ -510,7 +510,7 @@
                     </div>
 
                     <div id="aiSection" class="ai-section hidden">
-                        <h4>🤖 Google AI Expert Analysis</h4>
+                        <h4>🤖 Expert Analysis</h4>
                         <div id="aiResponse" class="ai-response">
                             <!-- AI response will be populated here -->
                         </div>
@@ -539,15 +539,17 @@
     </div>
 
     <script>
-        // Configuration
+        // Configuration - UPDATED
         const CONFIG = {
+            // Replace with your own Google AI Studio API key
             apiKey: 'AIzaSyBMO6E4z_94Gsd65s7ft95v2ZjqGvmQCTQ',
-            apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'
+            apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
         };
 
         // State management
         let currentAnalysis = null;
         let currentElements = null;
+        let currentData = null;
 
         // Utility functions
         function showMessage(text, type = 'success') {
@@ -784,6 +786,7 @@
         function displayResults(data, analysis) {
             currentAnalysis = analysis;
             currentElements = data.elements;
+            currentData = data;
             
             // Update stats
             const statsGrid = document.getElementById('statsGrid');
@@ -854,7 +857,7 @@
             showMessage(`Analysis complete! Clinical score: ${analysis.score}/100. ${data.metadata.totalElements} elements analyzed.`, 'success');
         }
 
-        // AI Integration
+        // Enhanced AI Integration with better error handling
         async function callGoogleAI(data, analysis) {
             try {
                 showMessage('🤖 Calling Google AI for expert veterinary analysis...', 'warning');
@@ -909,40 +912,105 @@ Provide specific, actionable feedback for a veterinary student learning clinical
                 });
 
                 if (!response.ok) {
-                    throw new Error(`API Error: HTTP ${response.status}`);
+                    const errorText = await response.text();
+                    console.error('API Error Response:', errorText);
+                    throw new Error(`API Error: HTTP ${response.status} - Check API key configuration`);
                 }
 
                 const result = await response.json();
                 
                 if (result.candidates && result.candidates[0]) {
                     const aiAnalysis = result.candidates[0].content.parts[0].text;
-                    displayAIResponse(aiAnalysis);
+                    displayAIResponse(aiAnalysis, 'Google AI Expert');
                     showMessage('🤖 Expert AI analysis complete! Enhanced feedback provided above.', 'success');
+                } else if (result.error) {
+                    throw new Error(`API Error: ${result.error.message}`);
                 } else {
                     throw new Error('No response from AI');
                 }
             } catch (error) {
                 console.error('AI Analysis Error:', error);
-                showMessage(`AI analysis unavailable (${error.message}). Local analysis provides comprehensive feedback.`, 'error');
+                showMessage(`AI analysis unavailable (${error.message}). Enhanced local analysis provided instead.`, 'error');
+                
+                // Fallback: Show enhanced local analysis
+                showEnhancedLocalAnalysis(data, analysis);
             }
         }
 
-        function displayAIResponse(aiText) {
+        function displayAIResponse(aiText, provider) {
             const aiSection = document.getElementById('aiSection');
             const aiResponse = document.getElementById('aiResponse');
             
             aiResponse.innerHTML = `
-                <h5>🎓 Expert Veterinary Analysis</h5>
+                <h5>🎓 ${provider} Analysis</h5>
                 <div style="line-height: 1.6; margin: 15px 0;">
                     ${aiText.replace(/\n/g, '<br>')}
                 </div>
                 <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.9em; opacity: 0.8;">
-                    <p><strong>Analysis by:</strong> Google AI Gemini Pro - Veterinary Clinical Reasoning Specialist</p>
+                    <p><strong>Analysis by:</strong> ${provider} - Veterinary Clinical Reasoning Specialist</p>
                     <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
                 </div>
             `;
             
             aiSection.classList.remove('hidden');
+        }
+
+        function showEnhancedLocalAnalysis(data, analysis) {
+            // Generate enhanced local feedback
+            let enhancedFeedback = `
+                <h5>🎓 Enhanced Clinical Analysis</h5>
+                <div style="line-height: 1.6; margin: 15px 0;">
+                    <p><strong>Clinical Assessment:</strong> Your decision tree demonstrates ${analysis.score >= 80 ? 'excellent' : analysis.score >= 60 ? 'good' : 'developing'} clinical reasoning skills with a score of ${analysis.score}/100.</p>
+                    
+                    <p><strong>Diagnostic Approach:</strong> `;
+            
+            if (analysis.clinicalKeywords.abdominocentesis) {
+                enhancedFeedback += `Excellent inclusion of abdominocentesis as the primary diagnostic test for ascites. This is the gold standard approach that provides immediate, valuable information about the nature of the ascitic fluid.`;
+            } else {
+                enhancedFeedback += `Consider adding abdominocentesis as your first-line diagnostic test. It's essential for ascites evaluation and provides immediate information about protein content, cell count, and potential causes.`;
+            }
+            
+            enhancedFeedback += `</p><p><strong>Differential Coverage:</strong> `;
+            
+            if (analysis.majorCausesCount >= 3) {
+                enhancedFeedback += `Comprehensive coverage of major pathophysiological mechanisms (${analysis.majorCausesCount}/4 covered). Your systematic approach addresses the key causes of canine ascites effectively.`;
+            } else {
+                enhancedFeedback += `Expand your differential diagnosis to include all four major mechanisms: cardiac (right heart failure), hepatic (cirrhosis/portal hypertension), renal (protein-losing nephropathy), and neoplastic causes. Currently covering ${analysis.majorCausesCount}/4.`;
+            }
+            
+            enhancedFeedback += `</p><p><strong>Clinical Reasoning Quality:</strong> `;
+            
+            if (analysis.connectionRatio >= 70) {
+                enhancedFeedback += `Your decision tree shows excellent logical flow (${analysis.connectionRatio}% connection ratio) with clear connections between clinical findings, diagnostic tests, and therapeutic decisions.`;
+            } else if (analysis.connectionRatio >= 40) {
+                enhancedFeedback += `Good structural organization (${analysis.connectionRatio}% connection ratio), but consider adding more arrows to show the decision-making pathway more clearly.`;
+            } else {
+                enhancedFeedback += `Focus on creating clearer connections between elements to demonstrate your clinical reasoning process. Current connection ratio: ${analysis.connectionRatio}%.`;
+            }
+            
+            enhancedFeedback += `</p><p><strong>Treatment Planning:</strong> `;
+            
+            if (analysis.elementCounts.treatment >= 2) {
+                enhancedFeedback += `Good inclusion of multiple treatment approaches (${analysis.elementCounts.treatment} treatments). This shows understanding that treatment must be tailored to the underlying cause.`;
+            } else if (analysis.elementCounts.treatment === 1) {
+                enhancedFeedback += `You've included treatment consideration, but consider adding alternative therapeutic approaches based on different diagnostic findings.`;
+            } else {
+                enhancedFeedback += `Include specific treatment protocols for different diagnoses. Treatment should be cause-specific rather than symptomatic.`;
+            }
+            
+            enhancedFeedback += `</p><p><strong>Next Steps for Learning:</strong> `;
+            
+            if (analysis.score >= 80) {
+                enhancedFeedback += `Excellent work! Now consider how you would adapt this approach for Phase 2 (no ultrasound) and Phase 3 (limited laboratory access). Think about cost-effective alternatives, emergency vs. non-emergency presentations, and client communication strategies.`;
+            } else if (analysis.score >= 60) {
+                enhancedFeedback += `Good foundation! Focus on expanding your differential diagnoses, ensuring all major causes are covered, and strengthening the logical connections in your decision tree.`;
+            } else {
+                enhancedFeedback += `Continue developing your decision tree by adding missing diagnostic tests, ensuring all major differentials are covered, and including specific treatment protocols for each diagnosis. Remember to start with abdominocentesis as your primary diagnostic step.`;
+            }
+            
+            enhancedFeedback += `</p></div>`;
+            
+            displayAIResponse(enhancedFeedback, 'Enhanced Local Analysis');
         }
 
         // Main analysis functions
