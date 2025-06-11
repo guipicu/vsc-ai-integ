@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VSC - Complete AI Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            min-height: 100vh;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .case-info {
+            background: #e8f5e8;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .editor-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .analysis-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .drawio-container {
+            border: 3px solid #e1e8ed;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .textarea:focus {
+            border-color: #4facfe;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .results-section {
+            margin: 20px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .elements-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+
+        .element-item {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .element-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .element-exam {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+
+        .element-diagnosis {
+            background: #f3e5f5;
+            border-left-color: #9c27b0;
+        }
+
+        .element-treatment {
+            background: #e8f5e8;
+            border-left-color: #4caf50;
+        }
+
+        .element-case {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+
+        .element-other {
+            background: #f5f5f5;
+            border-left-color: #9e9e9e;
+        }
+
+        .feedback-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .feedback-section h4 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feedback-section li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .feedback-section li::before {
+            content: "•";
+            color: #4facfe;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .ai-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .ai-response {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .message {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .message-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .message-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .message-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tips-section {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .tips-section h4 {
+            margin-bottom: 15px;
+        }
+
+        .tips-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .tips-section li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .tips-section li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+
+        .phase-indicator {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .analysis-panel {
+                max-height: none;
+            }
+            
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 Visual Synthesis Challenge</h1>
+            <p>Advanced Clinical Decision Tree Analysis with AI Integration</p>
+            <div class="status-badges">
+                <div class="badge">✅ Draw.io Integrated</div>
+                <div class="badge">🤖 Google AI Ready</div>
+                <div class="badge">📊 Advanced Analytics</div>
+                <div class="badge">🏥 Veterinary Focused</div>
+            </div>
+        </div>
+
+        <div class="case-info">
+            <h3>📋 Clinical Case</h3>
+            <p><strong>Patient:</strong> Mixed-breed dog, 7 years old, neutered male</p>
+            <p><strong>Presentation:</strong> Progressive abdominal distension (ascites) for 10 days, increasing lethargy, and decreased appetite over the last 48 hours</p>
+            <p><strong>Objective:</strong> Create a comprehensive decision tree for systematic diagnosis and management</p>
+        </div>
+
+        <div class="main-content">
+            <div class="editor-section">
+                <h3>🎨 Decision Tree Editor</h3>
+                <p>Create your clinical decision tree using the integrated Draw.io editor below:</p>
+                
+                <div class="drawio-container">
+                    <iframe id="drawio-frame" 
+                            src="https://embed.diagrams.net/?embed=1&ui=atlas&spin=1&modified=unsavedChanges&proto=json&libraries=1" 
+                            width="100%" 
+                            height="500" 
+                            frameborder="0">
+                    </iframe>
+                </div>
+
+                <div class="phase-indicator">
+                    <h4>📍 Current Phase: Phase 1 - Ideal Patient (No Constraints)</h4>
+                    <p>Create a complete decision tree assuming access to all diagnostic and treatment options.</p>
+                    <p><strong>Requirements:</strong></p>
+                    <ul>
+                        <li>At least 4-5 differential diagnoses for ascites</li>
+                        <li>Logical sequence of diagnostic tests</li>
+                        <li>Treatment options based on different findings</li>
+                        <li>Clear pathophysiological mechanisms</li>
+                    </ul>
+                </div>
+
+                <div class="controls">
+                    <h4>📤 Export & Analysis</h4>
+                    <p><strong>Instructions:</strong></p>
+                    <ol>
+                        <li>Complete your diagram in the editor above</li>
+                        <li>Go to: <strong>File → Export as → XML</strong></li>
+                        <li>Ensure <strong>"Compressed" is unchecked</strong></li>
+                        <li>Copy all XML content and paste below</li>
+                    </ol>
+                    
+                    <textarea id="xmlInput" 
+                              class="textarea" 
+                              placeholder="Paste your Draw.io XML here...&#10;&#10;The system will automatically parse your decision tree elements and provide comprehensive analysis including:&#10;• Structural analysis&#10;• Clinical reasoning assessment&#10;• Veterinary-specific feedback&#10;• Google AI expert review"></textarea>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-ai" onclick="analyzeWithAI()">
+                            🤖 Complete AI Analysis
+                        </button>
+                        <button class="btn btn-primary" onclick="analyzeLocal()">
+                            🔍 Quick Analysis
+                        </button>
+                        <button class="btn btn-success" onclick="loadExample()">
+                            📝 Load Example
+                        </button>
+                        <button class="btn btn-warning" onclick="clearAll()">
+                            🗑️ Clear All
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analysis-panel">
+                <h3>📊 Analysis Results</h3>
+                
+                <div id="loadingSection" class="loading">
+                    <div class="spinner"></div>
+                    <h4>🤖 AI Analysis in Progress</h4>
+                    <p>Analyzing clinical reasoning structure...</p>
+                    <p><em>This may take 10-30 seconds</em></p>
+                </div>
+
+                <div id="resultsSection" class="results-section hidden">
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- Stats will be populated here -->
+                    </div>
+
+                    <div class="elements-list" id="elementsList">
+                        <!-- Elements will be populated here -->
+                    </div>
+
+                    <div class="feedback-section" id="feedbackSection">
+                        <!-- Feedback will be populated here -->
+                    </div>
+
+                    <div id="aiSection" class="ai-section hidden">
+                        <h4>🤖 Google AI Expert Analysis</h4>
+                        <div id="aiResponse" class="ai-response">
+                            <!-- AI response will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="messagesSection">
+                    <div class="message message-success">
+                        🚀 System ready! Create your decision tree above, then paste the XML for analysis.
+                    </div>
+                </div>
+
+                <div class="tips-section">
+                    <h4>💡 Tips for Effective Decision Trees</h4>
+                    <ul>
+                        <li>Use rectangles for diagnostic tests and examinations</li>
+                        <li>Use diamonds for decision points and branching</li>
+                        <li>Use rounded rectangles for diagnoses and treatments</li>
+                        <li>Include flow arrows to show logical progression</li>
+                        <li>Consider cardiac, hepatic, renal, and neoplastic causes</li>
+                        <li>Start with abdominocentesis as primary diagnostic step</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            apiKey: 'AIzaSyBMO6E4z_94Gsd65s7ft95v2ZjqGvmQCTQ',
+            apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'
+        };
+
+        // State management
+        let currentAnalysis = null;
+        let currentElements = null;
+
+        // Utility functions
+        function showMessage(text, type = 'success') {
+            const messagesSection = document.getElementById('messagesSection');
+            const className = `message message-${type}`;
+            messagesSection.innerHTML = `<div class="${className}">${text}</div>`;
+        }
+
+        function showLoading(show = true) {
+            document.getElementById('loadingSection').style.display = show ? 'block' : 'none';
+            document.getElementById('resultsSection').classList.toggle('hidden', show);
+        }
+
+        function decodeHtmlEntities(text) {
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = text;
+            return textarea.value;
+        }
+
+        // XML parsing functions
+        function parseDrawioXML(xmlText) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                
+                const parseError = xmlDoc.querySelector('parsererror');
+                if (parseError) {
+                    throw new Error('Invalid XML format. Please export as uncompressed XML from Draw.io.');
+                }
+                
+                const cells = xmlDoc.querySelectorAll('mxCell');
+                const elements = [];
+                const connections = [];
+                
+                cells.forEach(cell => {
+                    const id = cell.getAttribute('id');
+                    const value = cell.getAttribute('value');
+                    const source = cell.getAttribute('source');
+                    const target = cell.getAttribute('target');
+                    
+                    if (source && target) {
+                        connections.push({
+                            id: id,
+                            from: source,
+                            to: target,
+                            label: value ? decodeHtmlEntities(value) : 'connection'
+                        });
+                    } else if (value && value.trim()) {
+                        const decodedValue = decodeHtmlEntities(value);
+                        if (decodedValue.trim()) {
+                            const type = detectElementType(decodedValue);
+                            elements.push({
+                                id: id,
+                                text: decodedValue.trim(),
+                                type: type
+                            });
+                        }
+                    }
+                });
+                
+                return {
+                    elements: elements,
+                    connections: connections,
+                    metadata: {
+                        totalElements: elements.length,
+                        totalConnections: connections.length,
+                        exportedAt: new Date().toISOString()
+                    }
+                };
+            } catch (error) {
+                throw new Error(`XML parsing failed: ${error.message}`);
+            }
+        }
+
+        function detectElementType(text) {
+            const lower = text.toLowerCase();
+            
+            // Diagnostic tests and examinations
+            if (lower.includes('exam') || lower.includes('test') || lower.includes('cbc') || 
+                lower.includes('ultrasound') || lower.includes('radiograph') || lower.includes('x-ray') ||
+                lower.includes('abdominocentesis') || lower.includes('echocardiography') || 
+                lower.includes('biochemistry') || lower.includes('urinalysis') || lower.includes('biopsy')) {
+                return 'exam';
+            }
+            
+            // Diagnoses and differentials
+            if (lower.includes('diagnosis') || lower.includes('differential') || 
+                lower.includes('cardiac') || lower.includes('hepatic') || lower.includes('renal') ||
+                lower.includes('heart') || lower.includes('liver') || lower.includes('kidney') ||
+                lower.includes('neoplasia') || lower.includes('cancer') || lower.includes('tumor') ||
+                lower.includes('ascites') || lower.includes('failure') || lower.includes('disease') ||
+                lower.includes('cirrhosis') || lower.includes('hypoprotein')) {
+                return 'diagnosis';
+            }
+            
+            // Treatments and therapies
+            if (lower.includes('treatment') || lower.includes('therapy') || lower.includes('surgery') ||
+                lower.includes('medication') || lower.includes('drug') || lower.includes('fluid') ||
+                lower.includes('diuretic') || lower.includes('antibio') || lower.includes('manage')) {
+                return 'treatment';
+            }
+            
+            // Case presentation
+            if (lower.includes('case') || lower.includes('patient') || lower.includes('dog') ||
+                lower.includes('cat') || lower.includes('animal') || lower.includes('present')) {
+                return 'case';
+            }
+            
+            return 'other';
+        }
+
+        // Analysis functions
+        function generateAdvancedAnalysis(data) {
+            const elementCounts = {
+                exam: 0,
+                diagnosis: 0,
+                treatment: 0,
+                case: 0,
+                other: 0
+            };
+            
+            data.elements.forEach(element => {
+                elementCounts[element.type]++;
+            });
+            
+            let score = 40; // Base score
+            const strengths = [];
+            const improvements = [];
+            const suggestions = [];
+            
+            // Scoring and feedback logic
+            if (elementCounts.diagnosis >= 4) {
+                score += 25;
+                strengths.push(`Comprehensive differential diagnosis coverage (${elementCounts.diagnosis} diagnoses identified)`);
+            } else {
+                score += elementCounts.diagnosis * 5;
+                improvements.push('Expand differential diagnoses to include all major causes: cardiac, hepatic, renal, and neoplastic');
+            }
+            
+            if (elementCounts.exam >= 3) {
+                score += 20;
+                strengths.push(`Appropriate diagnostic testing strategy (${elementCounts.exam} tests included)`);
+            } else {
+                score += elementCounts.exam * 5;
+                improvements.push('Include key diagnostic tests: abdominocentesis, CBC, biochemistry, imaging studies');
+            }
+            
+            if (elementCounts.treatment >= 2) {
+                score += 15;
+                strengths.push(`Treatment pathways considered (${elementCounts.treatment} therapeutic approaches)`);
+            } else if (elementCounts.treatment === 1) {
+                score += 8;
+                improvements.push('Add treatment alternatives based on different diagnostic findings');
+            } else {
+                improvements.push('Include specific treatment protocols for different diagnoses');
+            }
+            
+            // Connection analysis
+            const connectionRatio = data.connections.length / Math.max(data.elements.length, 1);
+            if (connectionRatio >= 0.7) {
+                score += 10;
+                strengths.push(`Excellent logical flow (${data.connections.length} connections show clear reasoning pathway)`);
+            } else if (connectionRatio >= 0.4) {
+                score += 5;
+                strengths.push(`Good structural organization (${data.connections.length} logical connections)`);
+            } else {
+                improvements.push('Add more connecting arrows to show decision flow and clinical reasoning pathways');
+            }
+            
+            // Clinical content analysis
+            const clinicalKeywords = {
+                abdominocentesis: false,
+                cardiac: false,
+                hepatic: false,
+                renal: false,
+                neoplastic: false
+            };
+            
+            data.elements.forEach(element => {
+                const text = element.text.toLowerCase();
+                if (text.includes('abdominocentesis') || text.includes('paracentesis')) {
+                    clinicalKeywords.abdominocentesis = true;
+                }
+                if (text.includes('cardiac') || text.includes('heart')) {
+                    clinicalKeywords.cardiac = true;
+                }
+                if (text.includes('hepatic') || text.includes('liver')) {
+                    clinicalKeywords.hepatic = true;
+                }
+                if (text.includes('renal') || text.includes('kidney')) {
+                    clinicalKeywords.renal = true;
+                }
+                if (text.includes('neoplasia') || text.includes('cancer') || text.includes('tumor')) {
+                    clinicalKeywords.neoplastic = true;
+                }
+            });
+            
+            if (clinicalKeywords.abdominocentesis) {
+                score += 10;
+                strengths.push('Excellent inclusion of abdominocentesis - the gold standard first-line diagnostic test for ascites');
+            } else {
+                improvements.push('Consider abdominocentesis as the primary diagnostic procedure for ascites evaluation');
+            }
+            
+            const majorCausesCount = [clinicalKeywords.cardiac, clinicalKeywords.hepatic, clinicalKeywords.renal, clinicalKeywords.neoplastic].filter(Boolean).length;
+            if (majorCausesCount >= 3) {
+                score += 10;
+                strengths.push('Complete coverage of major pathophysiological mechanisms causing ascites');
+            } else {
+                suggestions.push('Ensure coverage of all major mechanisms: cardiac (right heart failure), hepatic (cirrhosis/hypoproteinemia), renal (protein loss), neoplastic');
+            }
+            
+            // Default suggestions
+            suggestions.push('Consider adaptation for Phase 2: How would you modify this approach without ultrasound availability?');
+            suggestions.push('Consider adaptation for Phase 3: How would you manage with limited laboratory access?');
+            suggestions.push('Include emergency vs non-emergency presentation pathways based on clinical severity');
+            
+            if (strengths.length === 0) {
+                strengths.push('Systematic visual approach to clinical case organization demonstrates structured thinking');
+            }
+            
+            return {
+                score: Math.min(score, 100),
+                strengths,
+                improvements,
+                suggestions,
+                elementCounts,
+                clinicalKeywords,
+                majorCausesCount,
+                connectionRatio: Math.round(connectionRatio * 100)
+            };
+        }
+
+        function displayResults(data, analysis) {
+            currentAnalysis = analysis;
+            currentElements = data.elements;
+            
+            // Update stats
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${data.metadata.totalElements}</div>
+                    <div class="stat-label">Total Elements</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${data.metadata.totalConnections}</div>
+                    <div class="stat-label">Connections</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${analysis.score}/100</div>
+                    <div class="stat-label">Clinical Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${analysis.majorCausesCount}/4</div>
+                    <div class="stat-label">Major Causes</div>
+                </div>
+            `;
+            
+            // Update elements list
+            const elementsList = document.getElementById('elementsList');
+            let elementsHTML = '<h4>📋 Clinical Elements Detected</h4>';
+            elementsHTML += `<p><strong>Distribution:</strong> ${analysis.elementCounts.exam} exams, ${analysis.elementCounts.diagnosis} diagnoses, ${analysis.elementCounts.treatment} treatments</p>`;
+            
+            data.elements.forEach(element => {
+                elementsHTML += `<div class="element-item element-${element.type}">
+                    <strong>${element.type.toUpperCase()}:</strong> ${element.text}
+                </div>`;
+            });
+            
+            elementsList.innerHTML = elementsHTML;
+            
+            // Update feedback
+            const feedbackSection = document.getElementById('feedbackSection');
+            let feedbackHTML = '';
+            
+            if (analysis.strengths.length > 0) {
+                feedbackHTML += '<h4>✅ Clinical Strengths</h4><ul>';
+                analysis.strengths.forEach(strength => {
+                    feedbackHTML += `<li>${strength}</li>`;
+                });
+                feedbackHTML += '</ul>';
+            }
+            
+            if (analysis.improvements.length > 0) {
+                feedbackHTML += '<h4>🎯 Areas for Improvement</h4><ul>';
+                analysis.improvements.forEach(improvement => {
+                    feedbackHTML += `<li>${improvement}</li>`;
+                });
+                feedbackHTML += '</ul>';
+            }
+            
+            if (analysis.suggestions.length > 0) {
+                feedbackHTML += '<h4>💡 Advanced Considerations</h4><ul>';
+                analysis.suggestions.forEach(suggestion => {
+                    feedbackHTML += `<li>${suggestion}</li>`;
+                });
+                feedbackHTML += '</ul>';
+            }
+            
+            feedbackSection.innerHTML = feedbackHTML;
+            
+            // Show results
+            showLoading(false);
+            showMessage(`Analysis complete! Clinical score: ${analysis.score}/100. ${data.metadata.totalElements} elements analyzed.`, 'success');
+        }
+
+        // AI Integration
+        async function callGoogleAI(data, analysis) {
+            try {
+                showMessage('🤖 Calling Google AI for expert veterinary analysis...', 'warning');
+                
+                // Prepare elements summary
+                const elementsSummary = data.elements.map(el => `${el.type}: ${el.text}`).join('; ');
+                
+                // Construct veterinary-specific prompt
+                const prompt = `You are a veterinary specialist analyzing a clinical decision tree for canine ascites. 
+
+CASE: Mixed-breed dog, 7 years old, progressive abdominal distension (ascites) for 10 days, lethargy, decreased appetite.
+
+DECISION TREE ANALYSIS:
+- Total elements: ${data.metadata.totalElements}
+- Elements: ${elementsSummary}
+- Connections: ${data.metadata.totalConnections}
+- Local analysis score: ${analysis.score}/100
+
+CURRENT ASSESSMENT:
+- Exams: ${analysis.elementCounts.exam}
+- Diagnoses: ${analysis.elementCounts.diagnosis} 
+- Treatments: ${analysis.elementCounts.treatment}
+- Major pathophysiological mechanisms covered: ${analysis.majorCausesCount}/4
+
+Please provide expert veterinary feedback focusing on:
+1. Clinical reasoning quality and completeness
+2. Diagnostic approach appropriateness for ascites
+3. Missing critical elements (abdominocentesis, major differentials)
+4. Treatment pathway adequacy
+5. Overall veterinary clinical thinking demonstration
+
+Provide specific, actionable feedback for a veterinary student learning clinical reasoning. Keep response under 400 words and focus on educational value.`;
+
+                const requestData = {
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 800
+                    }
+                };
+
+                const response = await fetch(`${CONFIG.apiUrl}?key=${CONFIG.apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates[0]) {
+                    const aiAnalysis = result.candidates[0].content.parts[0].text;
+                    displayAIResponse(aiAnalysis);
+                    showMessage('🤖 Expert AI analysis complete! Enhanced feedback provided above.', 'success');
+                } else {
+                    throw new Error('No response from AI');
+                }
+            } catch (error) {
+                console.error('AI Analysis Error:', error);
+                showMessage(`AI analysis unavailable (${error.message}). Local analysis provides comprehensive feedback.`, 'error');
+            }
+        }
+
+        function displayAIResponse(aiText) {
+            const aiSection = document.getElementById('aiSection');
+            const aiResponse = document.getElementById('aiResponse');
+            
+            aiResponse.innerHTML = `
+                <h5>🎓 Expert Veterinary Analysis</h5>
+                <div style="line-height: 1.6; margin: 15px 0;">
+                    ${aiText.replace(/\n/g, '<br>')}
+                </div>
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.9em; opacity: 0.8;">
+                    <p><strong>Analysis by:</strong> Google AI Gemini Pro - Veterinary Clinical Reasoning Specialist</p>
+                    <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+                </div>
+            `;
+            
+            aiSection.classList.remove('hidden');
+        }
+
+        // Main analysis functions
+        function analyzeLocal() {
+            const xmlText = document.getElementById('xmlInput').value.trim();
+            
+            if (!xmlText) {
+                showMessage('Please paste your Draw.io XML first! Export from Draw.io as uncompressed XML.', 'error');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                
+                const data = parseDrawioXML(xmlText);
+                
+                if (data.elements.length === 0) {
+                    showMessage('No elements found in the diagram. Make sure to export as uncompressed XML from Draw.io.', 'error');
+                    showLoading(false);
+                    return;
+                }
+                
+                const analysis = generateAdvancedAnalysis(data);
+                displayResults(data, analysis);
+                
+            } catch (error) {
+                showMessage(`Analysis error: ${error.message}`, 'error');
+                showLoading(false);
+            }
+        }
+
+        function analyzeWithAI() {
+            const xmlText = document.getElementById('xmlInput').value.trim();
+            
+            if (!xmlText) {
+                showMessage('Please paste your Draw.io XML first! Export from Draw.io as uncompressed XML.', 'error');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                
+                const data = parseDrawioXML(xmlText);
+                
+                if (data.elements.length === 0) {
+                    showMessage('No elements found in the diagram. Make sure to export as uncompressed XML from Draw.io.', 'error');
+                    showLoading(false);
+                    return;
+                }
+                
+                const analysis = generateAdvancedAnalysis(data);
+                displayResults(data, analysis);
+                
+                // Call AI for enhanced analysis
+                callGoogleAI(data, analysis);
+                
+            } catch (error) {
+                showMessage(`Analysis error: ${error.message}`, 'error');
+                showLoading(false);
+            }
+        }
+
+        function loadExample() {
+            const exampleXML = `<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram>
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="2" value="Canine Ascites&lt;br&gt;Decision Tree" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="340" y="40" width="140" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="3" value="Congestive Heart Failure&lt;br&gt;(Right-sided)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="4" value="Hepatic Disease&lt;br&gt;(Cirrhosis/Portal HTN)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="240" y="200" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="5" value="Renal Disease&lt;br&gt;(Protein Loss)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="400" y="200" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="6" value="Neoplasia&lt;br&gt;(Abdominal/Peritoneal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="560" y="200" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="7" value="Abdominocentesis&lt;br&gt;(Primary Diagnostic)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="320" width="140" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="8" value="CBC &amp;amp; Biochemistry&lt;br&gt;Panel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="480" y="320" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="9" value="Echocardiography" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="80" y="400" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="10" value="Fluid Therapy&lt;br&gt;(Balanced)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="300" y="480" width="100" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="11" value="Diuretic Therapy&lt;br&gt;(if cardiac)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="80" y="480" width="100" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="12" value="" style="endArrow=classic;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.2;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="2" target="3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="13" value="" style="endArrow=classic;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.4;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="2" target="4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="14" value="" style="endArrow=classic;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.6;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="2" target="5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="15" value="" style="endArrow=classic;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.8;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="2" target="6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="16" value="" style="endArrow=classic;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="4" target="7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="17" value="" style="endArrow=classic;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="3" target="9">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>`;
+            
+            document.getElementById('xmlInput').value = exampleXML;
+            showMessage('🎯 Comprehensive example loaded! This includes all major causes of ascites with appropriate diagnostic tests. Click "Complete AI Analysis" to see full evaluation.', 'success');
+        }
+
+        function clearAll() {
+            document.getElementById('xmlInput').value = '';
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('aiSection').classList.add('hidden');
+            showLoading(false);
+            showMessage('🗑️ All content cleared. Ready for new analysis.', 'success');
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            showMessage('🚀 VSC System fully loaded! Create your decision tree above, then export as XML for comprehensive analysis.', 'success');
+        });
+    </script>
+</body>
+</html>
